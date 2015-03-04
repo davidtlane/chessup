@@ -1,0 +1,160 @@
+
+
+#content {
+	padding-top:70px;
+}
+
+#content, body{
+	background-color:rgb(245,245,235);
+}
+
+.hidden{
+	display:none;
+}
+
+.square{
+	margin:0;
+	padding:0;
+	top:0;
+	border-style:solid;
+	border-width:2px;
+	width:12.5%;
+	height:12.5%;
+	float:left;
+	text-align:center;
+}
+
+.black{
+	border-color:rgb(160,160,180);
+	background-color:rgb(160,160,180);
+}
+
+.white{
+	border-color:rgb(220,220,240);
+	background-color:rgb(220,220,240);
+}
+
+.grey{
+	background-color:rgb(190,190,210);
+}
+
+.black-piece {
+	color:rgb(51,51,51);
+}
+
+.white-piece {
+	color:rgb(255,255,195);
+}
+
+.msg{
+	background-color:rgb(190,190,170);
+}
+
+.newline{
+	clear:both;
+}
+
+#game-board{
+	border: 10px ridge #FFEEBB;
+	margin-left:5px;
+	margin-right:5px;
+	margin-bottom:20px;
+}
+
+.test {
+	font-size: 40;
+	height:100px;
+}
+
+.options{
+	border-style:ridge;
+	border-color: rgb(255,195,255);
+	background-image: url("../img/bg.png");
+}
+
+.selected{
+	border-style:ridge;
+	border-color: rgb(255,195,255);
+	background-color:rgb(255,195,255);
+}
+
+.lastmove{
+	border-style:ridge;
+	border-color: rgb(195,255,255);
+}
+
+.center{
+	text-align:center;
+}
+
+.right{
+	float:right;
+}
+
+.left{
+	float:left;
+}
+
+#you-name, #opp-name, #msg-text {
+	font-size:1.2em;
+	font-weight:bold;
+}
+
+.label-as-badge {
+	  border-radius: 1em;
+}
+
+
+/*
+.navbar-brand, .navbar-text,
+.navbar p,
+.navbar .navbar-header,
+.navbar .nav > p,
+.navbar .nav > li > a,
+.navbar .nav {
+	color:rgb(190,190,170);
+	background-color:rgb(71,71,71);
+}
+*/
+.navbar,
+.navbar-brand,
+.navbar .nav > li > a,
+.nav .open>a, .nav .open>a:hover, .nav .open>a:focus
+ {
+	color:rgb(190,190,170);
+	background-color:rgb(71,71,71);
+}
+
+ul.nav {
+	padding-bottom:0;
+	margin-bottom:0;
+}
+
+.navbar-toggle, .navbar-brand {
+	border-style:none;
+	padding: 5px 10px 15px 10px;
+	margin-top:0;
+	margin-bottom:0;
+}
+
+#menu {
+	color:rgb(190,190,170);
+}
+
+#you-taken-list, #opp-taken-list {
+	padding:0, margin-bottom:0;
+	list-style-type:none;
+}
+
+
+.taken {
+	padding-left:4px;
+	font-size:1.2em;
+}
+
+.panel-body{
+	padding:5px;
+}
+
+
+
