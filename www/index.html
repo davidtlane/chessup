@@ -2,6 +2,7 @@
 
 <html>
 <head>
+
 	<meta charset="utf-8" />
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="msapplication-tap-highlight" content="no" />
@@ -152,11 +153,7 @@ Play from anywhere with this mobile two-player chess app!</p>
 		<div class="col-md-10 col-md-offset-1">
 			<div class="panel panel-default msg">
 				<div class="panel-body">
-					<div id="msg-text" class="left"></div>
-					<div id="msg-btns" class="right">
-						<button id="refuseBtn" class="btn btn-danger btn-xs respBtn">Refuse</button>
-						<button id="acceptBtn" class="btn btn-success btn-xs respBtn">Accept</button>
-					</div>
+					<div id="msg-text" class="center"></div>
 				</div>
 			</div>
 		</div><!-- col -->
@@ -215,6 +212,24 @@ Play from anywhere with this mobile two-player chess app!</p>
         <button type="button" class="btn btn-info btn-prom" data-dismiss="modal">Rook</button>
         <button type="button" class="btn btn-info btn-prom" data-dismiss="modal">Bishop</button>
         <button type="button" class="btn btn-info btn-prom" data-dismiss="modal">Knight</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- draw offered -->
+<div class="modal fade" id="drawModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="drawModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="drawModalLabel">Draw Offered</h4>
+      </div>
+      <div class="modal-body">
+        <p class="lead">Do you accept the draw?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="refuseBtn" type="button" class="btn btn-danger respBtn" data-dismiss="modal">Refuse</button>
+        <button id="acceptBtn" type="button" class="btn btn-success respBtn" data-dismiss="modal">Accept</button>
       </div>
     </div>
   </div>

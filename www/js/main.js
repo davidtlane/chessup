@@ -1,7 +1,4 @@
 
-//localStorage.url = "http://www.davidtlane.com/chess/";
-//localStorage.removeItem(url);
-
 requirejs.config({
 	baseUrl: 'js/lib',
 	paths: {
@@ -22,23 +19,18 @@ requirejs.config({
 
 })();
 
-
-
 function startApp($,bootstrap,login,signup,home,board) {
 
 	$(document).on('click','.navbar-collapse.in',function(ev) {
 		if( $(ev.target).is('a') && $(ev.target).attr('class') != 'dropdown-toggle' ) {
 			$(this).collapse('hide');
 		}
-	});
-
-	$(document).on('click','.navbar-collapse.in',function(ev) {
 		if( $(ev.target).is('button') && $(ev.target).attr('class') != 'dropdown-toggle' ) {
 			$(this).collapse('hide');
 		}
 	});
 
-	$(document).on("click", "a",  function(ev){
+	$(document).on("click", "a", function(ev){
 		var href = $(this).attr("href");
 		if (href) {
 			var newHash = href;
@@ -128,26 +120,13 @@ function startApp($,bootstrap,login,signup,home,board) {
 
 		hidePopUps();
 
-//	LOGIN-------------------------------
-
-//	SIGNUP-------------------------------
-
-//	HOME-------------------------------
-
 		if ( hash=="#home" ) {
-		
 			home.autoGetCurrentGames();
-			
 		}
-		
-//	BOARD-------------------------------
 
 		if ( hash=="#board" ) {
-
 			board.setupBoard();
-
 			$.getJSON(board.url(), board.synchUpdate);
-
 		}
 
 	}

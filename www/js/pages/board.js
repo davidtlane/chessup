@@ -86,8 +86,9 @@ define(['util/game_util','util/global'], function ($U, global) {
 			var state = json.data.curstate;
 			var check = (playerCol=="w") ? json.data.w_check : json.data.b_check;
 			var gameOver = (['b','w','-'].indexOf(state)==-1) ? false : true;
+			var drawOffered = (state=="D") ? true : false;
 
-			mayMove = ( (playerCol==curPlayer) && (!gameOver) ) ? true : false;
+			mayMove = ( (playerCol==curPlayer) && (!gameOver) && (!drawOffered) ) ? true : false;
 			
 			if (mayMove) $("#nav-game").show();
 			else $("#nav-game").hide();
@@ -152,7 +153,7 @@ define(['util/game_util','util/global'], function ($U, global) {
 			$("#you-name").html(uid);
 			$("#msg-text").html(msg);
 
-			if (state=="D" && mayMove) $("#msg-btns").show();
+			if (state=="D") $('#drawModal').modal('show');
 
 		},
 
@@ -255,7 +256,6 @@ define(['util/game_util','util/global'], function ($U, global) {
 		
 		endGameMoveResponse: function (ev) {
 			if (localStorage.currPage!="#board") return;
-			if (!mayMove) return;
 			var id = $(this).attr("id");
 			if (id=="acceptBtn") var move = "accept_draw";
 			if (id=="refuseBtn") var move = "refuse_draw";
