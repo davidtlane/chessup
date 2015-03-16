@@ -1,5 +1,5 @@
 
-define(function () {
+define( ['util/global'], function (global) {
 
 	var login = {
 
@@ -13,7 +13,7 @@ define(function () {
 
 			$.ajax({
 				type: "POST",
-				url: localStorage.url+'login.php',
+				url: global.url+'login.php',
 				data: formObj,
 				dataType: "json",
 				success: function(json) {

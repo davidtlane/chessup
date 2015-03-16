@@ -1,4 +1,90 @@
 
+@font-face {
+    font-family: 'aqs';
+    src: url('aqs/aqs.ttf');
+}
+
+#header {
+	position: fixed;
+	top:0px; left:0px; right:0px;
+	height:50px;
+  background: -webkit-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: -o-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: -moz-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  color:rgb(190,190,170);
+	padding:5px 10px;
+	margin:0;
+}
+
+#top-logo {
+	float:left;
+	font-family: 'aqs';
+	font-size:28px;
+	width:100px;
+	margin:0; padding:0;
+}
+
+#menu-btn, #menu-btn:active, #menu-btn:focus {
+	float:right;
+  color:rgb(190,190,170);
+	background-color:rgba(0,0,01,0);
+	border-style:none;
+	padding:4px;
+	font-size:28px;
+}
+
+#menu {
+	position: fixed;
+	top:51px; right:0px;
+	z-index: 10;
+	width:200px;
+  background: -webkit-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: -o-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: -moz-linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  background: linear-gradient(45deg, rgb(61,81,81), rgb(81,61,81));
+  color:rgb(190,190,170);
+  display:none;
+}
+
+#menu p {
+	padding-top:5px;
+}
+
+#menu ul {
+	list-style-type: none;
+	padding-left:10px;
+}
+
+#menu ul li {
+	list-style-type: none;
+	padding-top:10px;
+}
+
+#menu ul li a {
+  color:rgb(190,190,170);
+}
+
+a,button,p {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+a:hover {
+	text-decoration:none;
+}
+
+#nav-game {
+	padding-right:20px;
+}
+
+#nav-game ul {
+	display:none;
+}
 
 #content {
 	padding-top:70px;
@@ -135,10 +221,6 @@ ul.nav {
 	padding: 15px 10px 5px 10px;
 	margin-top:0;
 	margin-bottom:0;
-}
-
-#menu {
-	color:rgb(190,190,170);
 }
 
 #you-taken-list, #opp-taken-list {

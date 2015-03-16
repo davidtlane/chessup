@@ -1,7 +1,81 @@
 <?php
 /* Chess game logic to handle moves. */
 
-include 'misc.php';
+/* Return the array of adjacent tiles (<=8). */
+function getAdjTiles ($fig_pos) {
+    $adj_tiles = array();
+    $i = 0;
+    $x = $fig_pos % 8;
+    $y = floor($fig_pos / 8);
+
+    if ($x > 0 && $y > 0)
+        $adj_tiles[$i++] = $fig_pos - 9;
+    if ($y > 0)
+        $adj_tiles[$i++] = $fig_pos - 8;
+    if ($x < 7 && $y > 0)
+        $adj_tiles[$i++] = $fig_pos - 7;
+    if ($x < 7)
+        $adj_tiles[$i++] = $fig_pos + 1;
+    if ($x < 7 && $y < 7)
+        $adj_tiles[$i++] = $fig_pos + 9;
+    if ($y < 7)
+        $adj_tiles[$i++] = $fig_pos + 8;
+    if ($x > 0 && $y < 7)
+        $adj_tiles[$i++] = $fig_pos + 7;
+    if ($x > 0)
+        $adj_tiles[$i++] = $fig_pos - 1;
+
+    return $adj_tiles;
+}
+
+/* Convert board coordinate [a-h][1-8] to 1dim index [0..63] */
+function bc2i ($coord) {
+    switch ($coord[0]) {
+        case 'a':
+            $x = 0;
+            break;
+        case 'b':
+            $x = 1;
+            break;
+        case 'c':
+            $x = 2;
+            break;
+        case 'd':
+            $x = 3;
+            break;
+        case 'e':
+            $x = 4;
+            break;
+        case 'f':
+            $x = 5;
+            break;
+        case 'g':
+            $x = 6;
+            break;
+        case 'h':
+            $x = 7;
+            break;
+        default:
+            return 64;
+             /* error code */
+    }
+    $y = $coord[1] - 1;
+    if ($y < 0 || $y > 7)
+        return 64;
+     /* error code */
+    $index = $y * 8 + $x;
+    return $index;
+}
+
+/* Convert index [0..63] to board coordinate [a-h][1-8] */
+function i2bc ($index) {
+    if ($index < 0 || $index > 63)
+        return '';
+    $y = floor($index / 8) + 1;
+    $x = chr(($index % 8) + 97);
+    $coord = $x . $y;
+    return $coord;
+}
 
 /* Check a number of tiles given a start, an end tile
 * (which is not included to the check) and a position
@@ -565,94 +639,80 @@ function isStaleMate($pcolor, $w_ep, $b_ep /*line of en-passant*/ )
 
 
 /* Verify move (full notation), execute it and modify game. */
-function handleMove($game, $uid, $move, $conn)
-{
-    global $acerror, $mail_from;
+function handleMove ($game, $uid, $move, $conn) {
+	if ($game == null)
+		return 'ERROR: Game not found!';
 
-    if ($game == null)
-        return 'ERROR: Game not found!';
+	/* Almost all helper functions require access to the chess board
+	* and passing it all the time is to complicated. Therefore, export
+	* it as global and operate on this global var even in this function.
+	* Before saving it is stored to the game context again. */
+	global $board;
+	$board = $game['board'];
 
-    /* Almost all helper functions require access to the chess board
-    * and passing it all the time is to complicated. Therefore, export
-    * it as global and operate on this global var even in this function.
-    * Before saving it is stored to the game context again. */
-    global $board;
-    $board = $game['board'];
+	$move = trim($move);
+	$result = 'undefined';
+	$move_handled = 0;
 
-    $move = trim($move);
-    $result = 'undefined';
-    $move_handled = 0;
+	/* Check whether moving is okay and get some vars. */
+	$player_w = $game['white'];
+	$player_b = $game['black'];
+	$cur_move = $game['curmove'];
+	$cur_player = $game['curplyr'];
+	/* b or w */
+	if (($cur_player == 'w' && $uid != $player_w) || ($cur_player == 'b' && $uid !=$player_b))
+		return 'Waiting for '.$cur_player;
+	if ($cur_player == 'w')
+		$cur_opp = 'b';
+	else
+		$cur_opp = 'w';
+	if ($game['curstate'] != '?' && $game['curstate'] != 'D')
+		return 'Game is over.';
+	/* Castling meaning:
+	* 0 - rook or king moved
+	* 1 - possible
+	* 9 - performed */
+	if ($cur_player == 'w') {
+		$may_castle_short = $game['wcs'];
+		$may_castle_long = $game['wcl'];
+	} else {
+		$may_castle_short = $game['bcs'];
+		$may_castle_long = $game['bcl'];
+	}
 
-    /* Check whether moving is okay and get some vars. */
-    $player_w = $game['white'];
-    $player_b = $game['black'];
-    $cur_move = $game['curmove'];
-    $cur_player = $game['curplyr'];
-     /* b or w */
-    if (($cur_player == 'w' && $uid != $player_w) || ($cur_player == 'b' && $uid !=
-        $player_b))
-        return 'turn over - cur_player='.$cur_player;
-    if ($cur_player == 'w')
-        $cur_opp = 'b';
-    else
-        $cur_opp = 'w';
-    if ($game['curstate'] != '?' && $game['curstate'] != 'D')
-        return 'Game is over.';
-    /* Castling meaning:
-    * 0 - rook or king moved
-    * 1 - possible
-    * 9 - performed */
-    if ($cur_player == 'w') {
-        $may_castle_short = $game['wcs'];
-        $may_castle_long = $game['wcl'];
-    } else {
-        $may_castle_short = $game['bcs'];
-        $may_castle_long = $game['bcl'];
-    }
+	/* Allow two-step of king to indicate castling. */
+	if ($cur_player == 'w' && $move == 'Ke1-g1')
+		$move = '0-0';
+	else
+		if ($cur_player == 'w' && $move == 'Ke1-c1')
+			$move = '0-0-0';
+		else
+			if ($cur_player == 'b' && $move == 'Ke8-g8')
+				$move = '0-0';
+			else
+				if ($cur_player == 'b' && $move == 'Ke8-c8')
+					$move = '0-0-0';
 
-    /* DEBUG echo 'HANDLE: w=$player_w,b=$player_b,c=$cur_player,';
-    echo 'm=$cur_move,may_castle=$may_castle_short,';
-    echo '$may_castle_long  <BR>';*/
+	/* Clear last move */
+	$game['lastmove'] = 'x';
+	$game['lastkill'] = 'x';
 
-    /* Allow two-step of king to indicate castling. */
-    if ($cur_player == 'w' && $move == 'Ke1-g1')
-        $move = '0-0';
-    else
-        if ($cur_player == 'w' && $move == 'Ke1-c1')
-            $move = '0-0-0';
-        else
-            if ($cur_player == 'b' && $move == 'Ke8-g8')
-                $move = '0-0';
-            else
-                if ($cur_player == 'b' && $move == 'Ke8-c8')
-                    $move = '0-0-0';
-
-    /* Accept --- although it is now called resign. */
-    if ($move == '---' || $move == 'resign')
-        $move = 'resigned';
-
-    /* Clear last move */
-    $game['lastmove'] = 'x';
-    $game['lastkill'] = 'x';
-    $game['oscf'] = 'x';
-    $game['olcf'] = 'x';
-
-    /* HANDLE MOVES:
-    * resign                            resign
-    * 0-0                               short castling
-    * 0-0-0                             long castling
-    * draw?                             offer a draw
-    * accept_draw                       accept the draw
-    * refuse_draw                       refuse the draw
-    * [PRNBQK][a-h][1-8][-:x][a-h][1-8] unshortened move
-    */
-    if ($move == 'draw?' && $game['curstate'] == '?') {
-        /* Offer draw */
-        $game['curstate'] = 'D';
-        $result = 'You have offered a draw.';
-        $draw_handled = 1;
-        $game['lastmove'] = 'DrawOffered';
-    } else
+	/* HANDLE MOVES:
+	* resign                            resign
+	* 0-0                               short castling
+	* 0-0-0                             long castling
+	* draw?                             offer a draw
+	* accept_draw                       accept the draw
+	* refuse_draw                       refuse the draw
+	* [PRNBQK][a-h][1-8][-:x][a-h][1-8] unshortened move
+	*/
+	if ($move == 'draw?' && $game['curstate'] == '?') {
+		/* Offer draw */
+		$game['curstate'] = 'D';
+		$result = 'You have offered a draw.';
+		$draw_handled = 1;
+		$game['lastmove'] = 'DrawOffered';
+	} else
         if ($move == 'refuse_draw' && $game['curstate'] == 'D') {
             /* Refuse draw */
             $game['curstate'] = '?';
@@ -668,7 +728,6 @@ function handleMove($game, $uid, $move, $conn)
                 $game['lastmove'] = 'DrawAccepted';
                 if ($game['curplyr'] == 'b')
                     $game['curmove']++; // new move as white offered
-                $game['mhistory'][count($game['mhistory'])] = 'draw';
             } else
                 if ($move == 'resigned') {
                     /* Resignation */
@@ -679,8 +738,6 @@ function handleMove($game, $uid, $move, $conn)
                 } else
                     if ($move == '0-0') {
                         /* Short castling */
-                        if ($may_castle_short != 1 || $may_castle_long == 9)
-                            return 'ERROR: You cannot castle short anymore!';
                         if ($cur_player == 'b' && $board[61] == '' && $board[62] == '') {
                             if (kingIsUnderAttack('b'))
                                 return 'ERROR: You cannot escape check by castling!';
@@ -703,16 +760,12 @@ function handleMove($game, $uid, $move, $conn)
                             $board[5] = 'wR';
                             $board[7] = '';
                         }
-                        if ($may_castle_short != 9)
-                            return 'ERROR: Cannot castle short because the way is blocked!';
                         $result = 'You castled short.';
                         $move_handled = 1;
                         $game['lastmove'] = '0-0';
                     } else
                         if ($move == '0-0-0') {
                             /* Long castling */
-                            if ($may_castle_long != 1 || $may_castle_short == 9)
-                                return 'ERROR: You cannot castle long anymore!';
                             if ($cur_player == 'b' && $board[57] == '' && $board[58] == '' && $board[59] ==
                                 '') {
                                 if (kingIsUnderAttack('b'))
@@ -736,97 +789,36 @@ function handleMove($game, $uid, $move, $conn)
                                 $board[3] = 'wR';
                                 $board[4] = '';
                             }
-                            if ($may_castle_long != 9)
-                                return 'ERROR: Cannot castle long because the way is blocked!';
                             $result = 'You castled long.';
                             $move_handled = 1;
                             $game['lastmove'] = '0-0-0';
                         } else {
                             /* Normal move: [PRNBQK][a-h][1-8][-:x][a-h][1-8][RNBQK] */
-
-                            /* A final capital letter may only be N,B,R,Q for the
-                            * appropiate chessman. 
-                            * FIXME it is not checked whether multiple promotion identifiers are
-                            * there. In that case last one is used and move executed properly 
-                            * but the history browsing will be broken. */
-                            $c = $move[strlen($move) - 1];
-                            if ($c >= 'A' && $c <= 'Z' && $c != 'N' && $c != 'B' && $c != 'R' && $c != 'Q')
-                                return 'ERROR: only N (knight),B (bishop),R (rook) and Q (queen) are valid chessman';
-
                             /* Validate figure and position. */
                             $fig_type = $move[0];
-                            $fig_name = getCMName($fig_type);
-                            if ($fig_name == 'empty')
-                                return 'ERROR: Figure ' . $fig_type . ' is unknown!';
                             $fig_coord = $move[1] . $move[2];
                             $fig_pos = bc2i($fig_coord);
-                            if ($fig_pos == 64)
-                                return 'ERROR: ' . $fig_coord . ' is invalid!';
-                            /* DEBUG  echo 'fig_type: $fig_type,fig_pos: $fig_pos<BR>'; */
-                            if ($board[$fig_pos] == '')
-                                return 'ERROR: ' . $fig_coord . ' is empty.';
-                            if ($board[$fig_pos][0] != $cur_player)
-                                return 'ERROR: Figure does not belong to you!';
-                            if ($board[$fig_pos][1] != $fig_type)
-                                return 'ERROR: Figure does not exist!';
-
                             /* Get target index */
                             $dest_coord = $move[4] . $move[5];
                             $dest_pos = bc2i($dest_coord);
-                            if ($dest_pos == 64)
-                                return 'ERROR: ' . $dest_coord . ' is invalid!';
-                            if ($dest_pos == $fig_pos)
-                                return 'ERROR: Current position and destination are equal!';
-                            /* DEBUG  echo 'dest_pos: $dest_pos<BR>'; */
-
                             /* Get action */
                             $action = $move[3];
                             if ($move[3] == '-')
                                 $action = 'M';
-                             /* move */
                             else
                                 if ($move[3] == 'x')
                                     $action = 'A';
-                             /* attack */
-                                else
-                                    return 'ERROR: ' . $action .
-                                        ' is unknown! Please use "-" for move and "x" for attack.';
                             /* Replace - with x if this is meant to be en-passant. */
                             if ($fig_type == 'P' && (abs($fig_pos - $dest_pos) == 7 || abs($fig_pos - $dest_pos) ==
                                 9)) {
                                 $action = 'A';
                                 $move = str_replace('-', 'x', $move);
                             }
-
                             /* Save for undo */
-                            $game['lastmove'] = str_replace('?', '', $move);
-
-                            /* If attacking an enemy unit must be present on tile
-                            * and if move then tile must be empty. In both cases
-                            * the king must not be in check after moving. */
-
-                            /* Check whether the move is along a valid path and
-                            * whether all tiles in between are empty thus the path
-                            * is not blocked. The final destination tile is not 
-                            * checked here. */
-                            if ($fig_type != 'P') {
-                                if (!tileIsReachable($fig_type, $fig_pos, $dest_pos))
-                                    return 'ERROR: ' . $dest_coord . ' is not in moving range of ' . $fig_name .
-                                        ' at ' . $fig_coord . '!';
-                            } else {
-                                if ($action == 'M' && !checkPawnMove($fig_pos, $dest_pos))
-                                    return 'ERROR: ' . $dest_coord . ' is not in moving range of ' . $fig_name .
-                                        ' at ' . $fig_coord . '!';
-                                else
-                                    if ($action == 'A' && !checkPawnAttack($fig_pos, $dest_pos))
-                                        return 'ERROR: ' . $dest_coord . ' is not in attacking range of ' . $fig_name .
-                                            ' at ' . $fig_coord . '!';
-                            }
+                            $game['lastmove'] = $move;
 
                             $en_passant_okay = 0;
-                            /* Check action */
-                            if ($action == 'M' && $board[$dest_pos] != '')
-                                return 'ERROR: ' . $dest_coord . ' is occupied!';
+
                             if ($action == 'A' && $board[$dest_pos] == '') {
                                 /* En passant of pawn? */
                                 if ($fig_type == 'P') {
@@ -839,18 +831,11 @@ function handleMove($game, $uid, $move, $conn)
                                             8) == 2)
                                             $en_passant_okay = 1;
                                     }
-                                    if ($en_passant_okay == 0)
-                                        return 'ERROR: En-passant is not possible!';
-                                } else
-                                    return 'ERROR: ' . $dest_coord . ' is empty!';
+                                }
                             }
-                            if ($action == 'A' && $board[$dest_pos][0] == $cur_player)
-                                return 'ERROR: You cannot attack own chessman at ' . $dest_coord . '!';
-
                             /* Backup affected tiles */
                             $old_fig_tile = $board[$fig_pos];
                             $old_dest_tile = $board[$dest_pos];
-
                             /* Perform move */
                             $board[$fig_pos] = '';
                             if ($board[$dest_pos] != '')
@@ -866,7 +851,6 @@ function handleMove($game, $uid, $move, $conn)
                                     $game['lastkill'] = sprintf('wP%s', $dest_pos + 8);
                                 }
                             }
-
                             /* If king is in check undo */
                             if (kingIsUnderAttack($cur_player)) {
                                 $board[$fig_pos] = $old_fig_tile;
@@ -878,9 +862,8 @@ function handleMove($game, $uid, $move, $conn)
                                     else
                                         $board[$dest_pos + 8] = 'wP';
                                 }
-                                return 'ERROR: Invalid move. Your king would be under attack then.';
+                                return 'SELF-CHECK';
                             }
-
                             /* Check whether this forbids any castling */
                             if ($fig_type == 'K') {
                                 if ($may_castle_short == 1)
@@ -894,7 +877,6 @@ function handleMove($game, $uid, $move, $conn)
                                 if ($may_castle_short == 1 && ($fig_pos % 8) == 7)
                                     $may_castle_short = 0;
                             }
-
                             /* If a pawn moved two tiles this will allow 'en passant'
                             * for next turn. */
                             if ($fig_type == 'P' && abs($fig_pos - $dest_pos) == 16) {
@@ -917,11 +899,8 @@ function handleMove($game, $uid, $move, $conn)
                                 if (($cur_player == 'w' && $dest_pos >= 56) || ($cur_player == 'b' && $dest_pos <=
                                     7)) {
                                     $pawn_upg = $move[strlen($move) - 1];
-                                    if ($pawn_upg == '?') {
-                                        $pawn_upg = 'Q';
-                                    }
                                     $board[$dest_pos] = $cur_player . $pawn_upg;
-                                    $result = sprintf('%s... promotion to %s!', $result, getCMName($pawn_upg));
+                                    $result = sprintf('%s... promotion to %s!', $result, $pawn_upg);
                                 }
                             }
 
@@ -945,17 +924,6 @@ function handleMove($game, $uid, $move, $conn)
                                     $mate_type = 2;
                                 }
 
-                            /* Backup castling info if rook or king has moved */
-                            if ($fig_type == 'R' || $fig_type == 'K') {
-                                if ($cur_player == 'w') {
-                                    $game['oscf'] = $game['wcs'];
-                                    $game['olcf'] = $game['wcl'];
-                                } else {
-                                    $game['oscf'] = $game['bcs'];
-                                    $game['olcf'] = $game['bcl'];
-                                }
-                            }
-
                             /* Update castling flags */
                             if ($cur_player == 'w') {
                                 $game['wcs'] = $may_castle_short;
@@ -973,11 +941,9 @@ function handleMove($game, $uid, $move, $conn)
                             if ($mate_type > 0) {
                                 if ($mate_type == 1) {
                                     $mate_name = 'mate';
-                                    //header("location: board.php?member={$_SESSION['username']}&gid=$gid");
                                     $result = $result . '... CHECKMATE';
                                 } else {
                                     $mate_name = 'stalemate';
-                                    //header("location: board.php?member={$_SESSION['username']}&gid=$gid");
                                     $result = $result . '... STALEMATE';
                                 }
                                 if ($game['curplyr'] == 'b')$game['curmove']++;
@@ -985,11 +951,6 @@ function handleMove($game, $uid, $move, $conn)
                             }
                         }
     if ($move_handled || $draw_handled) {
-        /* If game is over update user stats (includes resignation). */
-        //if ($game['curstate'] != '?' && $game['curstate'] != 'D') {
-        	//include 'rating.php';
-            //updateStats($game['white'], $game['black'], $game['curstate']);
-	    //}
 
         /* Set next player */
         if ($game['curplyr'] == 'b')

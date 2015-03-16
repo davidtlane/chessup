@@ -6,9 +6,11 @@ function getIdx(r,c){
 define(function () {
 	return {
 
-		getMsg: function (state, last, check, mayMove, playerCol, uid, opp ) {
+		getMsg: function (state, last, check, mayMove, playerCol, uid, opp) {
 			var drawMsg = "";
 			var oppCol = (playerCol=="w") ? "b" : "w";
+
+			
 
 			if (state=="-") return "Game Drawn.";
 			if (state==playerCol) {

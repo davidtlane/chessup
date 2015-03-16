@@ -7,7 +7,7 @@ if ($_POST){
 	include ('db_conn.php');
 
 	$uid = mysqli_real_escape_string($conn, $_POST['"uid"']);
-	$pwd = md5($_POST['"pwd"']);
+	$pwd = md5($secret_string.md5($_POST['"pwd"']));
 
 	$sql = "SELECT id,username,pwrd FROM membership
 					WHERE username='$uid'

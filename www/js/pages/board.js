@@ -82,18 +82,19 @@ define(['util/game_util','util/global'], function ($U, global) {
 			lastMove = json.data.lastmove;
 			gameBoard = json.data.board;
 
+			var lastCmdRes = json.data.last_cmd_res;
 			var opp = json.data.p_opponent;
 			var state = json.data.curstate;
 			var check = (playerCol=="w") ? json.data.w_check : json.data.b_check;
 			var gameOver = (['b','w','-'].indexOf(state)==-1) ? false : true;
-			var drawOffered = (state=="D") ? true : false;
+			var drawOffered = (playerCol==curPlayer && state=="D") ? true : false;
 
 			mayMove = ( (playerCol==curPlayer) && (!gameOver) && (!drawOffered) ) ? true : false;
 			
 			if (mayMove) $("#nav-game").show();
 			else $("#nav-game").hide();
 
-			var msg = $U.getMsg(state, lastMove, check, mayMove, playerCol, uid, opp );
+			var msg = $U.getMsg(state, lastMove, check, mayMove, playerCol, uid, opp);
 
 			castling.bcl = json.data.bcl;
 			castling.bcs = json.data.bcs;
@@ -153,7 +154,9 @@ define(['util/game_util','util/global'], function ($U, global) {
 			$("#you-name").html(uid);
 			$("#msg-text").html(msg);
 
-			if (state=="D") $('#drawModal').modal('show');
+			if (mayMove && lastCmdRes=='SELF-CHECK') $('#selfCheckModal').modal('show');
+
+			if (drawOffered) $('#drawModal').modal('show');
 
 		},
 

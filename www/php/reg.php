@@ -24,7 +24,7 @@ if ($_POST) {
 
 	if (!$error) {
 		$uid = mysqli_real_escape_string($conn, $_POST['"newUid"']);
-		$pwd = md5($_POST['"newPwd"']);	
+		$pwd = md5($secret_string.md5($_POST['"newPwd"']));	
 		$sql = "INSERT INTO membership VALUES('','$uid','$pwd')";
 		mysqli_query($conn, $sql);
  		

@@ -21,13 +21,17 @@ requirejs.config({
 
 function startApp($,bootstrap,login,signup,home,board) {
 
-	$(document).on('click','.navbar-collapse.in',function(ev) {
-		if( $(ev.target).is('a') && $(ev.target).attr('class') != 'dropdown-toggle' ) {
-			$(this).collapse('hide');
-		}
-		if( $(ev.target).is('button') && $(ev.target).attr('class') != 'dropdown-toggle' ) {
-			$(this).collapse('hide');
-		}
+	$(document).on('click','#menu',function(ev) {
+		if ( $(ev.target).is('a') ) $(this).slideToggle();
+		if ( $(ev.target).is('button') ) $(this).slideToggle();
+	});
+
+	$(document).on("click", "#menu-btn", function(ev){
+		$("#menu").slideToggle();
+	});
+
+	$(document).on("click", "#nav-game", function(ev){
+		$("#nav-game ul").slideToggle();
 	});
 
 	$(document).on("click", "a", function(ev){

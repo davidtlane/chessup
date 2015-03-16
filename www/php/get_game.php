@@ -22,6 +22,7 @@ if (!empty($_GET['cmd'])) {
 
 		// handle move
 		$res = handleMove($game, $uid, $cmd, $conn);
+		
 		if (is_array($res)){
 
 			list($game, $cmdres) = $res;
@@ -30,16 +31,10 @@ if (!empty($_GET['cmd'])) {
 			dbSaveGame($game, $gid, $conn);
 
 		} else {
+		
 			$cmdres = $res;
+			
 		}
-
-    if (strstr($cmdres, 'CHECKMATE')) {
-        mysqli_query($conn, "DELETE FROM ongoing_games WHERE gameid='$gid'");
-    }
-    
-    if (strstr($cmdres, 'STALEMATE')) {
-        mysqli_query($conn, "DELETE FROM ongoing_games WHERE gameid='$gid'");
-    }
 
 }
 

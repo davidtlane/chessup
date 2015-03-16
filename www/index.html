@@ -2,10 +2,11 @@
 
 <html>
 <head>
-
 	<meta charset="utf-8" />
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="msapplication-tap-highlight" content="no" />
+
+
 
 	<!-- Bootstrap core CSS -->
 	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -18,33 +19,31 @@
 </head>
 <body>
 
-<nav class="navbar navbar-fixed-top">
-	<div class="container-fluid">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#hidden-links">
-				<span class="sr-only">MENU</span>
-				<span id="menu" class="glyphicon glyphicon-menu-hamburger"></span>
-			</button>
-			<p class="navbar-brand">ChessUp</p>
-		</div>
-		<div class="collapse navbar-collapse" id="hidden-links">
-			<p class="navbar-text center" id="nav-user">USERNAME</p>
-			<ul class="nav navbar-nav">
-				<li><a id="nav-home" href="#home">Home</a></li>
-				<li><a id="nav-logout" href="#login">Log Out</a></li>
-				<li><a id="nav-login" href="#login">Log In</a></li>
-				<li><a id="nav-signup" href="#signup">Sign Up</a></li>
-				<li id="nav-game" class="dropdown">
-					<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Game Options <span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a><button id="offerDrawBtn" class="btn btn-default btn-block spcMove">Offer Draw</button></a></li>
-						<li><a><button id="resignBtn"class="btn btn-danger btn-block spcMove">Resign</button></a></li>
-					</ul>
-				</li>
-			</ul>
-		</div>
+<div id="myNav">
+	<div id="header">
+		<p id="top-logo">ChessUp</p>
+		<a type="button" id="menu-btn">
+			<span class="sr-only">MENU</span>
+			<span class="glyphicon glyphicon-menu-hamburger"></span>
+		</a>
 	</div>
-</nav>
+	<div id="menu">
+		<p class="center" id="nav-user">USERNAME</p>
+		<ul>
+			<li id="nav-home"><a href="#home">Home</a></li>
+			<li id="nav-logout"><a href="#login">Log Out</a></li>
+			<li id="nav-login"><a href="#login">Log In</a></li>
+			<li id="nav-signup"><a href="#signup">Sign Up</a></li>
+			<li id="nav-game">
+				<p>Game Options <span class="caret"></span></p>
+				<ul role="menu">
+					<li><a><button id="offerDrawBtn" class="btn btn-default btn-block spcMove">Offer Draw</button></a></li>
+					<li><a><button id="resignBtn"class="btn btn-danger btn-block spcMove">Resign</button></a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</div>
 
 <div class="container" id="content"></div>
 
@@ -235,6 +234,23 @@ Play from anywhere with this mobile two-player chess app!</p>
   </div>
 </div>
 
+<!-- self-check -->
+<div class="modal fade" id="selfCheckModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="selfCheckModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="selfCheckModalLabel">Nope!</h4>
+      </div>
+      <div class="modal-body">
+        <p class="lead">You can't put yourself in check!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-offline" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- offline -->
 <div class="modal fade" id="offlineModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="offlineModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -251,6 +267,7 @@ Play from anywhere with this mobile two-player chess app!</p>
     </div>
   </div>
 </div>
+
 <!-- ========================= modals ======================= -->
 
 <script data-main="js/main.js" src="js/lib/require.js"></script>

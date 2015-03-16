@@ -15,8 +15,6 @@
  b2spm: dito for black
  lastmove: last move in full notation (e.g. Pd2-d4 or x)
  lastkill: chessman captured in last move with board index (e.g. wP08 or x)
- oscf: old short castling flag (only set by king/rook move)
- olcf: dito for long castling
  board: chess board array (0=a1,63=h8) with e.g. 'bP', 'wQ' or ''
 
  p_maymove: whether it's player's turn (always 0 if user is not playing)
@@ -63,8 +61,6 @@ function dbSaveGame($game, $gid, $conn) {
 	$b2spm = $game['b2spm'];
 	$lastMove = $game['lastmove'];
 	$lastkill = $game['lastkill'];
-	$oscf = $game['oscf'];
-	$olcf = $game['olcf'];
 	$w_check = $game['w_check'];
 	$b_check = $game['b_check'];
 	$board = implode( ",", $game['board'] );
@@ -76,7 +72,6 @@ function dbSaveGame($game, $gid, $conn) {
 					wcs='$wcs', wcl='$wcl', bcs='$bcs', bcl='$bcl',
 					w2spm='$w2spm', b2spm='$b2spm',
 					lastmove='$lastMove', lastkill='$lastkill',
-					oscf='$oscf', olcf='$olcf',
 					board='$board',
 					ts_last='$now',
 					w_check='$w_check', b_check='$b_check',
@@ -113,8 +108,6 @@ function dbCreateGame($white, $black, $conn) {
 	$game['b2spm'] = 'x';
 	$game['lastmove'] = 'x';
 	$game['lastkill'] = 'x';
-	$game['oscf'] = 'x';
-	$game['olcf'] = 'x';
 	$game['w_taken'] = array();
 	$game['b_taken'] = array();
 	$game['board'] = array(
